@@ -1,31 +1,29 @@
+# app.py
+
 from flask import Flask, jsonify, request
 from flask_cors import CORS
+from chatbot import get_bot_response  # Import the function
 
 app = Flask(__name__)
-CORS(app)  # Allow all CORS requests. You can configure it to allow specific domains.
+CORS(app)
 
 @app.route('/chat', methods=['POST', 'OPTIONS'])
 def chat():
     if request.method == 'OPTIONS':
-        # Respond to pre-flight request
+        # CORS preflight
         response = jsonify({})
         response.headers.add('Access-Control-Allow-Origin', '*')
         response.headers.add('Access-Control-Allow-Methods', 'POST, OPTIONS')
         response.headers.add('Access-Control-Allow-Headers', 'Content-Type')
         return response
-    
-    if request.method == 'POST':
-        # Handle the actual POST request
-        data = request.get_json()  # Get the JSON data from the request
-        print(f"Received data: {data}")
-        
-        # Process the data (this is just a simple example)
-        response = {
-            "message": "Data received successfully!",
-            "received_data": data
-        }
-        return jsonify(response)
+
+    data = request.get_json()
+    print(f"Received data: {data}")
+
+    user_message = data.get('message', '')
+    bot_response = get_bot_response(user_message)
+
+    return jsonify({'response': bot_response})
 
 if __name__ == "__main__":
-    app.run(debug=False, use_reloader=False)
-
+    app.run(debug=True, use_reloader=False)
